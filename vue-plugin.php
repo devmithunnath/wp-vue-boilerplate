@@ -13,9 +13,15 @@ if ( !class_exists( 'Vue Plugin' ) ){
 
         private $shortcode_name = 'vue-plugin';
 
+        public function __construct () {
+            $this->acf_install();
+            $this->acf_load_and_save();
+        }
+
         public function register () {
             add_shortcode( $this->shortcode_name, [$this, 'shortcode'] );
             add_action( 'wp_enqueue_scripts', [$this, 'scripts'] );
+            //add_action('acf/render_field_settings/type=image', [$this, 'acf_add_default_image']);
         }
 
         public function shortcode ( $atts ) {
@@ -35,6 +41,45 @@ if ( !class_exists( 'Vue Plugin' ) ){
                 wp_enqueue_script( 'vue-plugin', plugin_dir_url( __FILE__ ) . 'frontend/js/script.js', [], '0.1', true );
                 wp_enqueue_style( 'vue-plugin', plugin_dir_url( __FILE__ ) . 'frontend/css/style.css', [], '0.1' );
             }
+        }
+
+        protected function acf_install(){
+            // Set up ACF
+            add_filter('acf/settings/path', function() {
+                return sprintf("%s/backend/acf/plugin/", dirname(__FILE__));
+            });
+            add_filter('acf/settings/dir', function() {
+                return sprintf("%s/backend/acf/plugin/", plugin_dir_url(__FILE__));
+            });
+            require_once(sprintf("%s/backend/acf/plugin/acf.php", dirname(__FILE__)));
+        }
+
+        protected function acf_load_and_save() {
+            $parent = acf_add_options_page(array(
+                'page_title' 	=> 'Vue Plugin - Workflow',
+                'post_id' => 'vue-plugin',
+                'menu_title' 	=> 'Workflow',
+                'menu_slug' 	=> 'vue-plugin',
+                'capability' 	=> 'edit_posts',
+                'icon_url' => 'dashicons-camera',
+                'position' => 7,
+                'redirect' 	=> false,
+            ));
+
+            acf_add_options_sub_page(array(
+                'page_title' 	=> 'Services',
+                'menu_title' 	=> 'Services',
+                'parent_slug' 	=> $parent['menu_slug'],
+            ));
+        }
+
+        protected function acf_add_default_image($field) {
+            acf_render_field_setting( $field, array(
+                'label'			=> 'Default Image',
+                'instructions'		=> 'Appears when creating a new post',
+                'type'			=> 'image',
+                'name'			=> 'default_value',
+            ));
         }
 
     }
