@@ -12,10 +12,28 @@ if ( !class_exists( 'Vue Plugin' ) ){
     class VuePlugin {
 
         private $shortcode_name = 'vue-plugin';
+        private $plugin_dir = ABSPATH . 'wp-content/plugins/vue-plugin/';
+
 
         public function __construct () {
             $this->acf_install();
-            $this->acf_load_and_save();
+            $this->acf_options();
+            $this->actions_and_filters();
+        }
+
+        public function actions_and_filters(){
+            add_filter('acf/settings/save_json', array($this, 'acf_json_save_point'));
+            add_filter('acf/settings/load_json', array($this, 'acf_json_load_point'));
+        }
+
+        function acf_json_save_point( $path ) {
+            $paths = plugin_dir_path( __FILE__ ) . '/backend/acf/acf-json';
+            return $paths;
+        }
+
+        function acf_json_load_point( $paths ) {
+            $paths[] = plugin_dir_path( __FILE__ ) . '/backend/acf/acf-json';
+            return $paths;
         }
 
         public function register () {
@@ -54,7 +72,7 @@ if ( !class_exists( 'Vue Plugin' ) ){
             require_once(sprintf("%s/backend/acf/plugin/acf.php", dirname(__FILE__)));
         }
 
-        protected function acf_load_and_save() {
+        protected function acf_options() {
             $parent = acf_add_options_page(array(
                 'page_title' 	=> 'Vue Plugin - Workflow',
                 'post_id' => 'vue-plugin',
