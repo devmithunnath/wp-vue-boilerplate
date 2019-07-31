@@ -47,7 +47,8 @@ if ( !class_exists( 'Vue Plugin' ) ){
             $vue_input = esc_attr(
                 json_encode($wp_output)
             );
-            return "<div id='vue-app' vue-data-atts='{$vue_input}'>Hey There! Loading now.....</div>";
+            // return "<div id='vue-app' vue-data-atts='{$vue_input}'>Hey There! Loading now.....</div>";
+            readfile( plugin_dir_path( __FILE__ ) . '/frontend/hello-world/dist/index.html' );
         }
 
         public function scripts (){
